@@ -1,6 +1,7 @@
 class Conversation < ActiveRecord::Base
   attr_accessible :subject if Mailboxer.protected_attributes?
 
+  belongs_to :movement
   has_many :messages, :dependent => :destroy
   has_many :receipts, :through => :messages
 

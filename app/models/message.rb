@@ -11,6 +11,7 @@ class Message < Notification
   }
 
   mount_uploader :attachment, AttachmentUploader
+  delegate :movement, to: :conversation
 
   include Concerns::ConfigurableMailer
 

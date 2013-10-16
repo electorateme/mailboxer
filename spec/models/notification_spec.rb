@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Mailboxer::Notification do
+describe Message do
 
   before do
     @entity1 = FactoryGirl.create(:user)
@@ -41,8 +41,9 @@ describe Mailboxer::Notification do
   end
 
   it "should notify several users" do
-    recipients = Set.new [@entity1,@entity2,@entity3]
-    Mailboxer::Notification.notify_all(recipients,"Subject","Body")
+    recipients = Set.new [@entity1, @entity2, @entity3]
+    Notification.notify_all(recipients, "Subject", "Body")
+
     #Check getting ALL receipts
     @entity1.mailbox.receipts.size.should==1
     receipt      = @entity1.mailbox.receipts.first
@@ -77,7 +78,7 @@ describe Mailboxer::Notification do
   end
 
   it "should notify a single recipient" do
-    Mailboxer::Notification.notify_all(@entity1,"Subject","Body")
+    Notification.notify_all(@entity1, "Subject", "Body")
 
     #Check getting ALL receipts
     @entity1.mailbox.receipts.size.should==1
@@ -92,10 +93,10 @@ describe Mailboxer::Notification do
     notification.subject.should=="Subject"
     notification.body.should=="Body"
   end
-
+  
   describe "#expire" do
-    subject { described_class.new }
-
+    subject { Notification.new }
+    
     describe "when the notification is already expired" do
       before do
         subject.stub(:expired? => true)
@@ -123,11 +124,11 @@ describe Mailboxer::Notification do
         subject.expire
       end
     end
-
+    
   end
-
+  
   describe "#expire!" do
-    subject { described_class.new }
+    subject { Notification.new }
 
     describe "when the notification is already expired" do
       before do
@@ -156,44 +157,44 @@ describe Mailboxer::Notification do
         subject.expire!
       end
     end
-
+    
   end
 
   describe "#expired?" do
-    subject { described_class.new }
+    subject { Notification.new }
     context "when the expiration date is in the past" do
       before { subject.stub(:expires => Time.now - 1.second) }
       it 'should be expired' do
         subject.expired?.should be_true
       end
     end
-
+    
     context "when the expiration date is now" do
       before {
         time = Time.now
         Time.stub(:now => time)
         subject.stub(:expires => time)
       }
-
+      
       it 'should not be expired' do
         subject.expired?.should be_false
       end
     end
-
+    
     context "when the expiration date is in the future" do
       before { subject.stub(:expires => Time.now + 1.second) }
       it 'should not be expired' do
         subject.expired?.should be_false
       end
     end
-
+    
     context "when the expiration date is not set" do
       before {subject.stub(:expires => nil)}
       it 'should not be expired' do
         subject.expired?.should be_false
       end
     end
-
+    
   end
 
 end

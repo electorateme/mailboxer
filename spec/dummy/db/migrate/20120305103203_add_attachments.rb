@@ -1,9 +1,5 @@
 class AddAttachments < ActiveRecord::Migration
-  def self.up
+  def change
     add_column :notifications, :attachment, :string
-  end
-
-  def self.down
-    remove_column :notifications, :attachment
   end
 end

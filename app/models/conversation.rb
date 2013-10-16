@@ -1,33 +1,30 @@
-class Mailboxer::Conversation < ActiveRecord::Base
-  self.table_name = :mailboxer_conversations
-
+class Conversation < ActiveRecord::Base
   attr_accessible :subject if Mailboxer.protected_attributes?
 
-  belongs_to :movement
-  has_many :messages, :dependent => :destroy, :class_name => "Mailboxer::Message"
-  has_many :receipts, :through => :messages, :class_name => "Mailboxer::Receipt"
+  has_many :messages, :dependent => :destroy
+  has_many :receipts, :through => :messages
 
   validates_presence_of :subject
 
   before_validation :clean
 
   scope :participant, lambda {|participant|
-    select('DISTINCT mailboxer_conversations.*').
-      where('mailboxer_notifications.type'=> Mailboxer::Message.name).
-      order("mailboxer_conversations.updated_at DESC").
-      joins(:receipts).merge(Mailboxer::Receipt.recipient(participant))
+    select('DISTINCT conversations.*').
+      where('notifications.type'=> Message.name).
+      order("conversations.updated_at DESC").
+      joins(:receipts).merge(Receipt.recipient(participant))
   }
   scope :inbox, lambda {|participant|
-    participant(participant).merge(Mailboxer::Receipt.inbox.not_trash.not_deleted)
+    participant(participant).merge(Receipt.inbox.not_trash.not_deleted)
   }
   scope :sentbox, lambda {|participant|
-    participant(participant).merge(Mailboxer::Receipt.sentbox.not_trash.not_deleted)
+    participant(participant).merge(Receipt.sentbox.not_trash.not_deleted)
   }
   scope :trash, lambda {|participant|
-    participant(participant).merge(Mailboxer::Receipt.trash)
+    participant(participant).merge(Receipt.trash)
   }
   scope :unread,  lambda {|participant|
-    participant(participant).merge(Mailboxer::Receipt.is_unread)
+    participant(participant).merge(Receipt.is_unread)
   }
   scope :not_trash,  lambda {|participant|
     participant(participant).merge(Receipt.not_trash)
@@ -106,12 +103,12 @@ class Mailboxer::Conversation < ActiveRecord::Base
 
   #Returns the receipts of the conversation for one participants
   def receipts_for(participant)
-    Mailboxer::Receipt.conversation(self).recipient(participant)
+    Receipt.conversation(self).recipient(participant)
   end
 
   #Returns the number of messages of the conversation
   def count_messages
-    Mailboxer::Message.conversation(self).count
+    Message.conversation(self).count
   end
 
   #Returns true if the messageable is a participant of the conversation
@@ -124,7 +121,7 @@ class Mailboxer::Conversation < ActiveRecord::Base
 	def add_participant(participant)
 		messages = self.messages
 		messages.each do |message|
-		  receipt = Mailboxer::Receipt.new
+		  receipt = Receipt.new
 		  receipt.notification = message
 		  receipt.is_read = false
 		  receipt.receiver = participant

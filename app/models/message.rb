@@ -1,8 +1,7 @@
-class Mailboxer::Message < Mailboxer::Notification
+class Message < Notification
   attr_accessible :attachment if Mailboxer.protected_attributes?
-  self.table_name = :mailboxer_notifications
 
-  belongs_to :conversation, :class_name => "Mailboxer::Conversation", :validate => true, :autosave => true
+  belongs_to :conversation, :validate => true, :autosave => true
   validates_presence_of :sender
 
   class_attribute :on_deliver_callback
@@ -12,8 +11,6 @@ class Mailboxer::Message < Mailboxer::Notification
   }
 
   mount_uploader :attachment, AttachmentUploader
-
-  delegate :movement, to: :conversation
 
   include Concerns::ConfigurableMailer
 
@@ -34,7 +31,6 @@ class Mailboxer::Message < Mailboxer::Notification
 
     #Sender receipt
     sender_receipt = build_receipt(sender, 'sentbox', true)
-
     temp_receipts << sender_receipt
 
     temp_receipts.each(&:valid?)
@@ -62,7 +58,7 @@ class Mailboxer::Message < Mailboxer::Notification
 
   private
   def build_receipt(receiver, mailbox_type, is_read = false)
-    Mailboxer::Receipt.new.tap do |receipt|
+    Receipt.new.tap do |receipt|
       receipt.notification = self
       receipt.is_read = is_read
       receipt.receiver = receiver

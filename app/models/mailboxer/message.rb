@@ -13,6 +13,8 @@ class Mailboxer::Message < Mailboxer::Notification
 
   mount_uploader :attachment, AttachmentUploader
 
+  delegate :movement, to: :conversation
+
   include Concerns::ConfigurableMailer
 
   class << self

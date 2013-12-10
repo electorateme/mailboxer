@@ -40,11 +40,11 @@ class Message < Notification
       #Should send an email?
       if Mailboxer.uses_emails
         if Mailboxer.mailer_wants_array
-          get_mailer.send_email(self, recipients).deliver
+          get_mailer.delay.send_email(self, recipients)
         else
           recipients.each do |recipient|
             email_to = recipient.send(Mailboxer.email_method, self)
-            get_mailer.send_email(self, recipient).deliver if email_to.present?
+            get_mailer.delay.send_email(self, recipient) if email_to.present?
           end
         end
       end

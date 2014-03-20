@@ -1,5 +1,5 @@
 class Message < Notification
-  attr_accessible :attachment if Mailboxer.protected_attributes?
+  # attr_accessible :attachment if Mailboxer.protected_attributes?
 
   belongs_to :conversation, :validate => true, :autosave => true
   validates_presence_of :sender
@@ -10,7 +10,7 @@ class Message < Notification
     where(:conversation_id => conversation.id)
   }
 
-  mount_uploader :attachment, AttachmentUploader
+  # mount_uploader :attachment, AttachmentUploader
   delegate :movement, to: :conversation
 
   include Concerns::ConfigurableMailer

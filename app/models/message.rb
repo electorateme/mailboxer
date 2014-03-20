@@ -1,5 +1,5 @@
 class Message < Notification
-  # attr_accessible :attachment if Mailboxer.protected_attributes?
+  attr_accessible :attachment if Mailboxer.protected_attributes?
 
   belongs_to :conversation, :validate => true, :autosave => true
   validates_presence_of :sender
@@ -10,7 +10,10 @@ class Message < Notification
     where(:conversation_id => conversation.id)
   }
 
-  # mount_uploader :attachment, AttachmentUploader
+  has_attached_file :attachment, {
+    path: ":rails_root/public/system/:class/attachments/:id_:timestamp.:style.:extension",
+    storage: :s3, s3_credentials: ElectorateMe::Application.config.s3_file}
+
   delegate :movement, to: :conversation
 
   include Concerns::ConfigurableMailer

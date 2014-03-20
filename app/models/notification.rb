@@ -1,14 +1,10 @@
 class Notification < ActiveRecord::Base
   attr_accessor :recipients
-  attr_accessible :body, :subject, :global, :expires, :attachment if Mailboxer.protected_attributes?
+  attr_accessible :body, :subject, :global, :expires if Mailboxer.protected_attributes?
 
   belongs_to :sender, :polymorphic => :true
   belongs_to :notified_object, :polymorphic => :true
   has_many :receipts, :dependent => :destroy
-
-  has_attached_file :attachment, {
-    path: ":rails_root/public/system/:class/attachments/:id_:timestamp.:style.:extension",
-    storage: :s3, s3_credentials: ElectorateMe::Application.config.s3_file}
 
   validates_presence_of :subject, :body
 
